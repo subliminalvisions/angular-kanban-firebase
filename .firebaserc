@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "kanban-fb1": {
+      "hosting": {
+        "kanban-firebase-app": [
+          "kanban-fb1"
+        ]
+      }
+    }
+  }
+}
