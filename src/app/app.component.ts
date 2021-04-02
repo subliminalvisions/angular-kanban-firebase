@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { Task } from './task/task';
 import { CdkDragDrop, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
-import { TaskDialogComponent } from './task-dialog/task-dialog.component';
-import { TaskDialogResult } from './task-dialog/task-dialog.component';
+import { TaskDialogResult, TaskDialogComponent } from './task-dialog/task-dialog.component';
+import { AngularFirestore } from '@angular/fire/firestore';
 
 @Component({
   selector: 'app-root',
@@ -12,16 +12,17 @@ import { TaskDialogResult } from './task-dialog/task-dialog.component';
 })
 export class AppComponent {
   title = 'kanban-firebase-app';
-  todo: Task[] = [
-    { title: 'buy milk', description: 'Go to store' },
-    { title: 'buy bread', description: 'also at the store' } 
-  ];
   // todo: Task[] = [...];
-  inProgress: Task[] = [];
-  done: Task[] = [];
+  // todo: Task[] = [
+  //   { title: 'buy milk', description: 'Go to store' },
+  // ];
+  // inProgress: Task[] = [];
+  // done: Task[] = [];
+  todo = this.store.collection('todo').valueChanges({ idField: 'id' });
+  inProgress = this.store.collection('inProgress').valueChanges({ idField: 'id' });
+  done = this.store.collection('done').valueChanges({ idField: 'id' });
 
-
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog, private store: AngularFirestore) {}
 
   newTask(): void {
     const dialogRef = this.dialog.open(TaskDialogComponent, {
@@ -32,7 +33,7 @@ export class AppComponent {
     });
     dialogRef
       .afterClosed()
-      .subscribe((result: TaskDialogResult) => this.todo.push(result.task));
+      .subscribe((result: TaskDialogResult) => this.store.collection('todo').add(result.task));
   }
 
   // editTask(list: string, task: Task): void {}
@@ -45,12 +46,10 @@ export class AppComponent {
       },
     });
     dialogRef.afterClosed().subscribe((result: TaskDialogResult) => {
-      const dataList = this[list];
-      const taskIndex = dataList.indexOf(task);
       if (result.delete) {
-        dataList.splice(taskIndex, 1);
+        this.store.collection(list).doc(task.id).delete();
       } else {
-        dataList[taskIndex] = task;
+        this.store.collection(list).doc(task.id).update(task);
       }
     });
   }
@@ -63,10 +62,30 @@ export class AppComponent {
 // When the delete flag is set to true (i.e., when the user has pressed the delete button), we remove the task from the corresponding list
 // Alternatively, we just replace the task on the given index with the task we got from the dialog result
 
+  // drop(event: CdkDragDrop<Task[]>): void {
+  //   if (event.previousContainer === event.container) {
+  //     return;
+  //   }
+  //   transferArrayItem(
+  //     event.previousContainer.data,
+  //     event.container.data,
+  //     event.previousIndex,
+  //     event.currentIndex
+  //   );
+  // }
+
   drop(event: CdkDragDrop<Task[]>): void {
     if (event.previousContainer === event.container) {
       return;
     }
+    const item = event.previousContainer.data[event.previousIndex];
+    this.store.firestore.runTransaction(() => {
+      const promise = Promise.all([
+        this.store.collection(event.previousContainer.id).doc(item.id).delete(),
+        this.store.collection(event.container.id).add(item),
+      ]);
+      return promise;
+    });
     transferArrayItem(
       event.previousContainer.data,
       event.container.data,
@@ -74,5 +93,6 @@ export class AppComponent {
       event.currentIndex
     );
   }
+  
 
 }
