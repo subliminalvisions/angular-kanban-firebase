@@ -5,10 +5,14 @@
   <span>KanbanFire</span>
 </mat-toolbar>
 
-<div class="content-wrapper">
-  <button (click)="newTask()" mat-button>
-    <mat-icon>add</mat-icon> Add Task
-  </button>
+<div class="content-wrapper ">
+  <div layout-margin >
+    <div class="example-button-row " layout="row" >
+      <button (click)="newTask()" mat-raised-button >
+        <mat-icon  >add</mat-icon> Add Task
+      </button>
+    </div>
+  </div>
   
   <div class="container-wrapper">
     <div class="container">

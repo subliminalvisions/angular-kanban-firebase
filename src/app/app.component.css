@@ -3,21 +3,17 @@
 mat-toolbar {
     margin-bottom: 20px;
 }
-
 mat-toolbar > span {
     margin-left: 10px;
 }
-
 .content-wrapper {
     max-width: 1400px;
     margin: auto;
 }
-
 .container-wrapper {
     display: flex;
     justify-content: space-around;
 }
-
 .container {
     width: 400px;
     margin: 0 25px 25px 0;
@@ -39,12 +35,13 @@ app-new-task {
     text-align: center;
     opacity: 0.2;
 }
-
 .cdk-drag-animating {
     transition: transform 250ms;
 }
-
 .cdk-drag-placeholder {
     opacity: 0;
+}
+.example-button-row {
+    padding: 12px 4px;
 }
 
